@@ -104,6 +104,7 @@ weapon_servo.sweep();
 	  's': reverse,
 	  'a': left,
 	  'd': right,
+	  'x': stop,
 	  'space': weapon,
 	  'escape': quit
   }

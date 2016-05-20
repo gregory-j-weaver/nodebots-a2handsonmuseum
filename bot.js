@@ -2,8 +2,8 @@ var five = require("johnny-five");
 var Particle = require("particle-io");
 var board = new five.Board({
   io: new Particle({
-    token: "private token here",
-    deviceId: "device id here"
+    token: "",
+    deviceId: ""
   })
 });
 
@@ -28,11 +28,27 @@ board.on("ready", function() {
       invertPWM: true
   });
 
-  var led_red = new five.Led("D7");
-  var led_blue = new five.Led("D6");
+  var led_red = new five.Led("D6");
+  var led_blue = new five.Led("D7");
 
-  var weapon_servo= new five.Servo("A4");
+  var weapon_servo= new five.Servo({
+      pin: "A4",
+      startAt: 90 
+    });
 
+  var botOptions = {
+    ledToLight: ""
+  };
+
+  var commandLineArgs = process.argv.slice(2);
+  commandLineArgs.forEach(function (val, index, array) {
+    if (val.startsWith("led="))
+    {
+        botOptions.ledToLight = val.substring(4);
+        console.log("led color specified");
+    }
+  });
+  console.log(botOptions);
 
 
 
@@ -40,38 +56,43 @@ board.on("ready", function() {
 // thus if the file was red.js it would light red, etc.
   led_red.off();
   led_blue.off();
-  led_red.on();
  
+  if (botOptions.ledToLight === "blue") {
+    led_blue.on();
+  } else if (botOptions.ledToLight === "red") {
+    led_red.on();
+  } else if (botOptions.ledToLight === "both") {
+    led_blue.on();
+    led_red.on();
+  }
 
-
-  function forward() {
+  var forward = function() {
 	  leftWheel.fwd(speed);
 	  rightWheel.fwd(speed);
   }
-
   
-  function reverse() {
+  var reverse = function() {
 	  leftWheel.rev(speed);
 	  rightWheel.rev(speed);
   }
 
 
-  function stop() {
+  var stop = function() {
 	  leftWheel.stop();
 	  rightWheel.stop();
   }
 
-  function left() {
+  var left = function() {
   	  leftWheel.rev(speed_turning);
 	  rightWheel.fwd(speed_turning);
   }
 
-  function right() {
+  var right = function() {
   	  leftWheel.fwd(speed_turning);
 	  rightWheel.rev(speed_turning);
   }
 
-  function quit() {
+  var quit = function() {
     weapon_servo.stop();
     leftWheel.stop();
     rightWheel.stop();
@@ -81,18 +102,14 @@ board.on("ready", function() {
   }
 
   var weapon_toggle = true;
-  function weapon() {
-  
-  
-  //need to fix the weapon toggle....I was thinking it should have a weapon_extend and a weapon_extract that gets called in alternation
-    /*if (weapon_toggle) {
-      weapon_servo.to(90);
+  var weapon = function() {
+    if (weapon_toggle) {
+      weapon_servo.to(180);
       }
     else {
       weapon_servo.to(0);
       }
-*/
-weapon_servo.sweep();
+    weapon_toggle = !weapon_toggle;
     }
 
   var stdin = process.stdin;
@@ -114,8 +131,6 @@ weapon_servo.sweep();
 	  if (!key || !keyMap[key.name]) return;
 	  console.log(keyMap[key.name]);
 	  keyMap[key.name]();
-
-
   });
 
 

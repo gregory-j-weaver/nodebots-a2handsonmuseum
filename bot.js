@@ -35,6 +35,16 @@ board.on("ready", function() {
       pin: "A4",
       startAt: 90 
     });
+ var weapon_wheel = new five.Motor({
+	pins: {
+		pwm: "A5",
+		dir: "D3"
+	},
+	invertPWM: true
+});
+
+
+
 
   var botOptions = {
     ledToLight: ""
@@ -110,6 +120,14 @@ board.on("ready", function() {
       weapon_servo.to(0);
       }
     weapon_toggle = !weapon_toggle;
+    weapon_wheel.on("forward", function(err, timestamp) {
+    // demonstrate braking after 5 seconds
+    board.wait(5000, function() {
+      weapon_wheel.brake();
+    });
+  });
+   weapon_wheel.forward(255);
+
     }
 
   var stdin = process.stdin;
